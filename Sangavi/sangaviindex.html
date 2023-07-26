@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-image: url('https://th.bing.com/th/id/OIP.B3Q9805ooOspoIKELMBatgHaEK?w=326&h=183&c=7&r=0&o=5&pid=1.7'); /* Replace with the path to your background image */
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    #app-container {
+      background-color: rgba(255, 255, 255, 0.8); /* Background color with opacity for better readability */
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: 0 auto;
+      margin-top: 50px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #clearButton {
+      background-color: gray; /* Red color for clear button */
+      margin-left: 10px;
+    }
+
+    #weatherResult {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #locationIcon {
+      cursor: pointer;
+      position: absolute;
+      top: 6px;
+      right: 30px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-container">
+    <h1>Weather App</h1>
+    <input type="text" id="cityInput" placeholder="Enter city name">
+    <button onclick="getWeather()">Get Weather</button>
+    <button id="clearButton" onclick="clearWeather()">Clear</button> <!-- Clear button added here -->
+    <div id="weatherResult"></div>
+    <div id="locationIcon" onclick="getLocationWeather()">&#x1F4CD;</div>
+  </div>
+
+  <script>
+    function getWeather(apiUrl) {
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          const weatherResult = document.getElementById('weatherResult');
+          if (data.cod === '404') {
+            weatherResult.innerHTML = `<p>Error: City not found</p>`;
+          } else {
+            const { name, main, weather } = data;
+            const temperature = main.temp;
+            const description = weather[0].description;
+
+            weatherResult.innerHTML = `<p>City: ${name}</p>
+                                       <p>Temperature: ${temperature} °C</p>
+                                       <p>${description}</p>`;
+          }
+        })
+        .catch(error => {
+          const weatherResult = document.getElementById('weatherResult');
+          weatherResult.innerHTML = `<p>Error: ${error.message}</p>`;
+        });
+    }
+
+    function getWeatherByLocation(latitude, longitude) {
+      const apiKey = '815d9c869e1ec958ac264b881609c488';
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${apiKey}`;
+      getWeather(apiUrl);
+    }
+
+    function getLocationWeather() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            getWeatherByLocation(latitude, longitude);
+          },
+          error => {
+            const weatherResult = document.getElementById('weatherResult');
+            weatherResult.innerHTML = `<p>Error: ${error.message}</p>`;
+          }
+        );
+      } else {
+        const weatherResult = document.getElementById('weatherResult');
+        weatherResult.innerHTML = `<p>Error: Geolocation is not supported by this browser.</p>`;
+      }
+    }
+
+    // Function to clear the weather information
+    function clearWeather() {
+      document.getElementById('weatherResult').innerHTML = '';
+      document.getElementById('cityInput').value = '';
+    }
+
+    // Get weather when the app is opened (onload)
+    window.onload = function () {
+      getLocationWeather();
+    };
+  </script>
+</body>
+</html>
