@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .left-layout {
+      flex: 70%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.7); /* White background color */
+      background-image: url('https://img.freepik.com/premium-photo/set-four-illustrations-landscape_875337-154.jpg?w=900');
+      border-radius: 0 20px 20px 0; /* Curved corner on the right side */
+      overflow: hidden; /* Hide overflowing parts of the image */
+      position: relative; /* Add relative positioning for the search box */
+      background-size: cover; /* Scale the image as large as possible without stretching */
+      background-position: center; /* Center the background image */
+      background-repeat: no-repeat; /* Prevent the image from repeating */
+    }
+
+    .left-layout img {
+      min-width: 100%; /* Make the image fill the entire left layout */
+      height: 100%; /* Maintain the aspect ratio of the image */
+    }
+
+    .search-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(255, 255, 255, 0.7); /* Transparent background */
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      padding: 5px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 10px 40px; /* Adjust the input box size */
+      border: none;
+      outline: none;
+      background-color: transparent; /* Set the input box to transparent */
+      font-size: 16px; /* Adjust font size if needed */
+    }
+
+    .search-box button {
+      background: transparent;
+      border: none;
+      padding: 5px;
+      cursor: pointer;
+    }
+
+    /* Make sure the search icon is visible */
+    .search-box img {
+      max-width: 30px;
+      max-height: 30px;
+    }
+
+    .right-layout {
+      flex: 30%;
+      padding: 20px;
+      background-color: #e2e0e0;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center; /* Align content to the center */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle box shadow */
+    }
+
+    .app-title {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #000000; /* Black color for the title */
+    }
+
+    #weatherResult {
+      margin-top: 10px; /* Adjust margin for spacing */
+      text-align: center; /* Center the weather description */
+    }
+
+    /* Weather details styles */
+    #weatherResult p {
+      font-size: 18px;
+      margin: 5px 0;
+    }
+
+    .weather-icon {
+      width: 50px;
+      height: 50px;
+    }
+
+    /* Additional styles */
+    .temperature-container {
+      background-color: #ffffff;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .temperature-text {
+      font-size: 40px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .left-layout {
+        flex: 100%;
+        border-radius: 20px; /* Remove the curved corner on smaller screens */
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="left-layout" id="leftLayout">
+      <!-- Weather icon will be dynamically inserted here -->
+      <div class="search-box">
+        <input type="text" id="cityInput" placeholder="Enter Location">
+        <button onclick="getWeather()">
+          <img src="https://img.icons8.com/?size=512&id=132&format=png" alt="Search Icon">
+        </button>
+      </div>
+    </div>
+    <div class="right-layout">
+      <h1 class="app-title">Weather App</h1>
+      <div class="temperature-container">
+        <p class="temperature-text" id="temperatureText"></p>
+        <div id="weatherResult"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getWeather() {
+      const apiKey = '815d9c869e1ec958ac264b881609c488';
+      const city = document.getElementById('cityInput').value;
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          const weatherResult = document.getElementById('weatherResult');
+          const temperatureText = document.getElementById('temperatureText');
+          const leftLayout = document.getElementById('leftLayout');
+          if (data.cod === '404') {
+            weatherResult.innerHTML = `<p>Error: City not found</p>`;
+          } else {
+            const { name, main, weather } = data;
+            const temperature = main.temp;
+            const description = weather[0].description;
+            const iconCode = weather[0].icon;
+
+            // Update temperature and weather description
+            temperatureText.textContent = `${temperature} °C`;
+            weatherResult.innerHTML = `<p>${description}</p>
+                                       <p>City: ${name}</p>`;
+
+            // Change left layout image based on weather condition
+            const backgroundImageUrl = getBackgroundImageUrl(iconCode);
+            leftLayout.style.backgroundImage = `url(${backgroundImageUrl})`;
+
+            // Set weather icon
+            const weatherIcon = document.createElement('img');
+            weatherIcon.classList.add('weather-icon');
+            weatherIcon.src = `https://openweathermap.org/img/w/${iconCode}.png`;
+            weatherResult.prepend(weatherIcon);
+          }
+        })
+        .catch(error => {
+          const weatherResult = document.getElementById('weatherResult');
+          weatherResult.innerHTML = `<p>Error: ${error.message}</p>`;
+        });
+    }
+
+    // Function to get background image URL based on weather condition
+    function getBackgroundImageUrl(weatherIcon) {
+      const weatherConditions = {
+        '01': 'https://img.freepik.com/premium-photo/colorful-autumn-landscape-mountains-sunrise_230497-3003.jpg?w=900', //clear sky
+        '02': 'https://img.freepik.com/free-vector/skye-wallpaper-with-fluffy-clouds_1017-30895.jpg?w=996&t=st=1690373537~exp=1690374137~hmac=bef4c6f33b381af94e4e8337c0ff3873fb879c6eff300498b12ca3ab19434030', //few clouds
+        '03': 'https://img.freepik.com/free-vector/cloud-background-pastel-paper-cut-style-vector_53876-135914.jpg?w=900&t=st=1690383500~exp=1690384100~hmac=7e1e6caba19262a715a39062bf57117b79346ad1f6749dbb88be5543df7667c5', //scattered cloud
+        '04': 'https://img.freepik.com/free-photo/dramatic-sky-tranquil-scene-dusk-generated-by-ai_188544-43238.jpg?t=st=1690384376~exp=1690387976~hmac=e2f877a344898a3b09beb57d67dddf775b30a03b56316b09e90d110c64d987a0&w=996', //broken cloudd
+        '09': 'https://img.freepik.com/free-vector/monsoon-rainfall-with-clouds-background_1017-32365.jpg?w=996&t=st=1690373450~exp=1690374050~hmac=c0482e3d6a3beb1fa2f5397d2e7152957371c16dae8a2cdbd97299cd2667d9d7', //shower rain
+        '10': 'https://img.freepik.com/premium-photo/rainy-day-swiss-countryside_702665-302.jpg?w=996', // rain
+        '11': 'https://img.freepik.com/free-photo/majestic-mountain-range-tranquil-meadow-spooky-forest-generated-by-ai_188544-38542.jpg?t=st=1690383727~exp=1690387327~hmac=42964351afeae76a3c49df8a0491e09661e628e2250945606d96c70668a0e4e7&w=996', //thunderstrom
+        '13': 'https://example.com/snow.jpg', //snow
+        '50': 'https://example.com/mist.jpg', //mist
+      };
+
+      const weatherCondition = weatherIcon.slice(0, -1); // Remove last character (d or n)
+      return weatherConditions[weatherCondition] || 'https://example.com/default.jpg';
+    }
+  </script>
+</body>
+
+</html>
+
