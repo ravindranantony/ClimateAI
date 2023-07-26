@@ -59,17 +59,17 @@ function weatherDetails(info){
         const {temp, feels_like, humidity} = info.main;
 
         if(id == 800){
-            wIcon.src = "icons/clear.svg";
+            wIcon.src = "clear.jpg";
         }else if(id >= 200 && id <= 232){
-            wIcon.src = "icons/storm.svg";  
+            wIcon.src = "storm.jpg";  
         }else if(id >= 600 && id <= 622){
-            wIcon.src = "icons/snow.svg";
+            wIcon.src = "snow.jpg";
         }else if(id >= 701 && id <= 781){
-            wIcon.src = "icons/haze.svg";
+            wIcon.src = "haze.jpg";
         }else if(id >= 801 && id <= 804){
-            wIcon.src = "icons/cloud.svg";
+            wIcon.src = "cloud.jpg";
         }else if((id >= 500 && id <= 531) || (id >= 300 && id <= 321)){
-            wIcon.src = "icons/rain.svg";
+            wIcon.src = "rain.jpg";
         }
         
         weatherPart.querySelector(".temp .numb").innerText = Math.floor(temp);
